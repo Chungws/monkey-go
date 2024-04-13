@@ -91,6 +91,7 @@ func testExpectedObject(t *testing.T, expected interface{}, actual object.Object
 func TestIntegerArithmetic(t *testing.T) {
 	tests := []vmTestCase{
 		{"1", 1},
+		{"-1", -1},
 		{"2", 2},
 		{"1 + 2", 3},
 		{"1 - 2", -1},
@@ -113,6 +114,8 @@ func TestBooleanExpressions(t *testing.T) {
 		{"1 == 2", false},
 		{"1 != 1", false},
 		{"1 != 2", true},
+		{"!true", false},
+		{"!false", true},
 	}
 
 	runVmTests(t, tests)

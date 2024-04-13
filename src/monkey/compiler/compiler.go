@@ -28,6 +28,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 				return err
 			}
 		}
+
 	case *ast.ExpressionStatement:
 		err := c.Compile(node.Expression)
 		if err != nil {
@@ -76,6 +77,21 @@ func (c *Compiler) Compile(node ast.Node) error {
 			c.emit(code.OpNotEqual)
 		case ">":
 			c.emit(code.OpGreaterThan)
+		default:
+			return fmt.Errorf("unknown operator %s", node.Operator)
+		}
+
+	case *ast.PrefixExpression:
+		err := c.Compile(node.Right)
+		if err != nil {
+			return err
+		}
+
+		switch node.Operator {
+		case "-":
+			c.emit(code.OpMinus)
+		case "!":
+			c.emit(code.OpBang)
 		default:
 			return fmt.Errorf("unknown operator %s", node.Operator)
 		}
