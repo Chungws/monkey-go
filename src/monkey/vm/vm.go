@@ -73,6 +73,18 @@ func (vm *VM) Run() error {
 				return err
 			}
 
+		case code.OpArray:
+			numElems := int(code.ReadUint16(vm.instructions[ip+1:]))
+			ip += 2
+
+			array := vm.buildArray(vm.sp-numElems, vm.sp)
+			vm.sp = vm.sp - numElems
+
+			err := vm.push(array)
+			if err != nil {
+				return err
+			}
+
 		case code.OpAdd, code.OpSub, code.OpMul, code.OpDiv:
 			err := vm.executeBinaryOperation(op)
 			if err != nil {
@@ -257,6 +269,16 @@ func (vm *VM) executeIntegerComparison(op code.Opcode, left, right object.Object
 	default:
 		return fmt.Errorf("unknown integer operator: %d", op)
 	}
+}
+
+func (vm *VM) buildArray(startIndex, endIndex int) object.Object {
+	elems := make([]object.Object, endIndex-startIndex)
+
+	for i := startIndex; i < endIndex; i++ {
+		elems[i-startIndex] = vm.stack[i]
+	}
+
+	return &object.Array{Elements: elems}
 }
 
 func nativeBoolToBooleanObject(input bool) object.Object {
