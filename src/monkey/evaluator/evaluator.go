@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	NULL  = &object.NULL{}
+	NULL  = &object.Null{}
 	TRUE  = &object.Boolean{Value: true}
 	FALSE = &object.Boolean{Value: false}
 )
