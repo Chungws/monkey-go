@@ -210,6 +210,10 @@ func (c *Compiler) Compile(node ast.Node) error {
 	case *ast.FunctionLiteral:
 		c.enterScope()
 
+		for _, p := range node.Parameters {
+			c.symbolTable.Define(p.Value)
+		}
+
 		err := c.Compile(node.Body)
 		if err != nil {
 			return err
@@ -225,7 +229,11 @@ func (c *Compiler) Compile(node ast.Node) error {
 
 		numLocals := c.symbolTable.numDefinitions
 		instructions := c.leaveScope()
-		compiled := &object.CompiledFunction{Instructions: instructions, NumLocals: numLocals}
+		compiled := &object.CompiledFunction{
+			Instructions:  instructions,
+			NumLocals:     numLocals,
+			NumParameters: len(node.Parameters),
+		}
 		c.emit(code.OpConstant, c.addConstant(compiled))
 
 	case *ast.CallExpression:
@@ -233,7 +241,14 @@ func (c *Compiler) Compile(node ast.Node) error {
 		if err != nil {
 			return err
 		}
-		c.emit(code.OpCall)
+		for _, a := range node.Arguments {
+			err := c.Compile(a)
+			if err != nil {
+				return err
+			}
+		}
+
+		c.emit(code.OpCall, len(node.Arguments))
 
 	case *ast.IndexExpression:
 		err := c.Compile(node.Left)
